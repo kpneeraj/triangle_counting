@@ -101,8 +101,6 @@ public class EdgeVertexSampling {
                     }
                 }
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

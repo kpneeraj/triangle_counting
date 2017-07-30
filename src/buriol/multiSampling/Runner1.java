@@ -95,27 +95,22 @@ public class Runner1 {
 
     public static void main(String args[]){
         //constants for running the comparison
-        String filename="CA-CondMat.txt";
-        int totalVertices = 23133;
-
-        //  int n=50000, m=500000;
+        String filename="com-dblp_undirected.txt";
+        int totalVertices = 317080;
         int iterations=1;
 
-        int testCases = 4;
-        int[] ns = {23133,
-                50000,
-                100000,
-                100000};
-        int[] ms = {93497,
-                250000,
-                500000,
-                1000000};
+        int[] ns = {150000, 1000, 2000, 2000,3000,3000,4000,4000,5000,5000,
+                    6000,6000,7000,7000,8000,8000,9000,9000,10000,10000};
+        int[] ms = {1000000, 10000, 10000, 20000, 20000, 40000, 40000, 60000, 60000, 80000,
+                80000, 100000, 100000, 120000, 120000, 140000, 140000,160000,160000,180000,200000};
 
-        for(int testcase=0;testcase<testCases;testcase++){
+        System.out.println("Multi pass multi sampling - " + filename + "\n");
+
+        for(int testcase=0;testcase<ns.length;testcase++){
             System.out.println("\n\nTEst case result for n=" + ns[testcase] + " and m="+ms[testcase]);
             Runner1 r = new Runner1(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
             System.out.println("Multiple sampling algorithm:");
-            System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-40s%-20s", "Iteration", "Vertex memory(n)", "Edge memory(m)","Black edges sampled", "Exact count", "Estimate","Time taken");
+            System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-40s%-20s%-20s", "Iteration", "Vertex memory(n)", "Edge memory(m)","Black edges sampled", "Total size", "Exact count", "Estimate","Error %","Time taken");
 
             double estimates[] = new double[iterations];
             for(int i=0;i<iterations;i++) {
@@ -128,7 +123,7 @@ public class Runner1 {
                 r.getCounts();
                 estimates[i] = r.getEstimateCount();
                 double endTime = System.currentTimeMillis();
-                System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-40s%-20s", i, r.vreservoirCapcity, r.eReservoirCapacity, r.blueEdges, r.triangleFormed.size(), estimates[i],(endTime-startTime)/1000);
+                System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-40s%-20s%-20s", i, r.vreservoirCapcity, r.eReservoirCapacity, r.blueEdges, (r.vreservoirCapcity+ r.eReservoirCapacity) ,  r.triangleFormed.size(), estimates[i],( 2224385-estimates[i])/(double)2224385,(endTime-startTime)/1000);
                 r.clearAll();
             }
 

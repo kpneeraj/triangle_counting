@@ -14,7 +14,7 @@ public class EdgeVertexMultiSamplingSinglePass {
     int blackEdgeCount, totalVertices, triangleCount=0, totalEdges=0, vreservoirCapcity, eReservoirCapacity,blueEdges=0;
     HashSet<String> triangleFormed = new HashSet<String>();
 
-//    HashMap<Integer,VertexInfo> res1map = new HashMap<Integer,VertexInfo>();
+    //    HashMap<Integer,VertexInfo> res1map = new HashMap<Integer,VertexInfo>();
     HashMap<Integer,VertexInfo> res2map= new HashMap<Integer,VertexInfo>();
     HashMap<Integer,VertexInfo> res3map= new HashMap<Integer,VertexInfo>();
 
@@ -31,7 +31,7 @@ public class EdgeVertexMultiSamplingSinglePass {
     public void clearAll(){
         edgeReservoir.clear();
         vertexReservoir.clear();
-     //   res1map.clear();
+        //   res1map.clear();
         res2map.clear();
         res3map.clear();
         triangleFormed.clear();
@@ -97,7 +97,7 @@ public class EdgeVertexMultiSamplingSinglePass {
             int random = (new Random().nextInt(totalEdges));
             if(random<eReservoirCapacity){
                 Edge e = edgeReservoir.remove(random);
-              //  removeTrianglesFormedWithEdge(e);
+                //  removeTrianglesFormedWithEdge(e);
                 removeEdgeFromReservoir(e);
 
                 //remove corrsponding black edges from level3 edge
@@ -160,12 +160,12 @@ public class EdgeVertexMultiSamplingSinglePass {
                 middle = w;
 
             triangleFormed.remove(smallest+","+middle+","+largest);
-            triangleCount--;
+            //  triangleCount--;
         }
     }
 
     public void addEdgeToReservoir(Edge edge) {
-      //  edgeReservoir.add(edge);
+        //  edgeReservoir.add(edge);
 
         int u =edge.u, v = edge.v;
         VertexInfo vl2Info,ul2Info;
@@ -259,40 +259,35 @@ public class EdgeVertexMultiSamplingSinglePass {
 
     public static void main(String args[]) {
         //constants for running the comparison
-        String filename="com-livejournal.ungraph.txt";
-        int totalVertices = 3997962;
-
-        //  int n=50000, m=500000;
+        String filename="com-orkut.ungraph.txt";
+        int totalVertices = 3072441;
         int iterations=1;
 
-        int testCases = 4;
-        int[] ns = {10000,
-                50000,
-                100000,
-                100000};
-        int[] ms = {100000,
-                250000,
-                500000,
-                1000000};
+        int[] ns = {10000, 50000, 75000, 100000, 200000};
+        int[] ms = {75000, 100000, 500000, 1000000, 5000000};
 
-        for(int testcase=0;testcase<testCases;testcase++){
-            System.out.println("\n\nTEst case result for n=" + ns[testcase] + " and m="+ms[testcase]);
+        System.out.println("Multiple sampling algorithm - single pass" + filename+"\n");
+
+        for(int testcase=0;testcase<ns.length;testcase++){
+            System.out.println("\n\nTest case result for n=" + ns[testcase] + " and m="+ms[testcase]);
             EdgeVertexMultiSamplingSinglePass r = new EdgeVertexMultiSamplingSinglePass(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
-            System.out.println("Multiple sampling algorithm:");
-            System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-40s", "Iteration", "Vertex memory(n)", "Edge memory(m)","Black edges sampled", "Exact count", "Estimate","Time taken");
+
+            System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-20s%-40s", "Iteration", "Vertex memory(n)", "Edge memory(m)","Blue edges sampled", "Total memory","Exact count", "Estimate","Time taken");
 
             double estimates[] = new double[iterations];
             for(int i=0;i<iterations;i++) {
                 double startTime = System.currentTimeMillis();
                 r.sampleVertices();
-                double time1 = System.currentTimeMillis();
+                //double time1 = System.currentTimeMillis();
                 r.sampleEdges();
                 double time2 = System.currentTimeMillis();
-                double timeParsingFile = time2-time1;
-            //    r.getCounts();
+                // double timeParsingFile = time2-time1;
+                //    r.getCounts();
                 estimates[i] = r.getEstimateCount();
                 double endTime = System.currentTimeMillis();
-                System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-40s", i, r.vreservoirCapcity, r.eReservoirCapacity, r.blueEdges, r.triangleFormed.size(), estimates[i],(endTime-startTime)/1000);
+                System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-20s%-40s", i, r.vreservoirCapcity, r.eReservoirCapacity, r.blueEdges,(r.vreservoirCapcity+ r.eReservoirCapacity+ r.blueEdges), r.triangleFormed.size(), estimates[i],(endTime-startTime)/1000);
+                System.out.println("\nCounted traingls:" + r.triangleCount);
+                System.out.println("\nUnique count:" + r.triangleFormed.size());
                 r.clearAll();
             }
 
@@ -302,12 +297,15 @@ public class EdgeVertexMultiSamplingSinglePass {
             for(int i=0;i<iterations;i++) {
                 sum+=estimates[i];
             }
-            System.out.println("\nAverage:" + sum/iterations);
+            //System.out.println("Average:" + sum/iterations);
+
         }
     }
 
     public double getEstimateCount(){
         int uTriangleCount = this.triangleFormed.size();
+        //    System.out.println("\nCounted traingls:" + triangleCount);
+        // System.out.println("\nUique count:" + uTriangleCount);
         double estimate = ((((double)totalEdges*(double)totalVertices))/((double)vreservoirCapcity*eReservoirCapacity))*(uTriangleCount/3);
         return estimate;
     }

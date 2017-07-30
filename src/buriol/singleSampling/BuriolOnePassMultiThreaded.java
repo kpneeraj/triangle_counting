@@ -65,7 +65,7 @@ public class BuriolOnePassMultiThreaded implements Callable<Integer> {
         /*
         fileBuffer.add(0,"");
         int s=0,A=0;
-        int x=1,m=1,M=iteration;
+        int x=1,m=1,M=memory;
         String edge; StringTokenizer st;
         int a=0,b=0;
         for (A = 1; A < fileBuffer.size(); A++) {
@@ -203,7 +203,7 @@ public class BuriolOnePassMultiThreaded implements Callable<Integer> {
         loadFile();
         readVertices();
         int count=0;
-      //  for(int i=0;i<iteration;i++){
+      //  for(int i=0;i<memory;i++){
             count+=sampleTriangles();
             //clearAll();
       //  }

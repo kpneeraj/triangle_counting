@@ -1,9 +1,6 @@
 package triest;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Created by Neeraj on 10/5/2016.
@@ -53,23 +50,20 @@ public class TriangleCounter {
                 vertexUInfo.incrementCount();
                 vertexVInfo.incrementCount();
                 globalCount++;
-               // System.out.println("Traingle formed: " + vertex + " " + vertexU + " " + vertexV);
             }
             else{
                 vertexCInfo.decrementCount();
                 vertexUInfo.decrementCount();
                 vertexVInfo.decrementCount();
                 globalCount--;
-               // System.out.println("Traingle delted: " + vertex + " " + vertexU + " " + vertexV);
             }
         }
 
-        /*This is important for the vertex-edge sampler*/
-        if(!isAdd){
-            //These lines are to remove vertices when there are no neighbors, so that we don't run out of memory
-            if(vertexUInfo.getNeighbors().size()==0) vertexMap.remove(vertexU);
-            if(vertexVInfo.getNeighbors().size()==0) vertexMap.remove(vertexV);
-        }
+//        if(!isAdd){
+//            //These lines are to remove vertices when there are no neighbors, so that we don't run out of memory
+//            if(vertexUInfo.getNeighbors().size()==0) vertexMap.remove(vertexU);
+//            if(vertexVInfo.getNeighbors().size()==0) vertexMap.remove(vertexV);
+//        }
     }
 
     public int getGlobalCount() {

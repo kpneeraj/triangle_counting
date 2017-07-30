@@ -277,20 +277,42 @@ public class MultiSampleMultiPass {
 
     private void run() {
         this.firstPass();
-        System.out.println("First pass done ");
+       // System.out.println("First pass done ");
         this.secondPass();
-        System.out.println("Second pass done ");
+        //System.out.println("Second pass done ");
         this.thirdPass();
-        System.out.println("Third pass done ");
+       // System.out.println("Third pass done ");
     }
 
     public static void main(String args[]){
-        String filename="facebook_combined.txt";
-        MultiSampleMultiPass instance = new MultiSampleMultiPass("graphs\\"+filename, 2000, 0.03);
-        instance.run();
-        System.out.println("M=" + instance.eReservoirCapacity + "q=" + instance.q);
-        System.out.println("Triangle estimate "+ instance.triangleCount);
-        System.out.println("Triangle estimate/3 "+ instance.triangleCount/3);
+        String filename="com-dblp_undirected.txt";
+
+
+
+        int testCases = 6;
+        int[] M = {50000,
+                30000,
+                20000,
+                20000,
+                25000, 60000};
+        double[] q = {0.01,
+                0.02,
+                0.015,
+                0.02,0.04,0.009};
+
+        System.out.format("\n%-20s%-20s%-20s%-20s%-20s", "M", "q", "Estimate","Estimate/3", "Time taken (s)" );
+        for(int testcase=0;testcase<testCases;testcase++){
+            MultiSampleMultiPass instance = new MultiSampleMultiPass("graphs\\"+filename, M[testcase], q[testcase]);
+            double startTime = System.currentTimeMillis();
+            instance.run();
+            System.out.format("\n%-20s%-20s%-20s%-20s%-20s",instance.eReservoirCapacity,instance.q,instance.triangleCount,instance.triangleCount/3, ( System.currentTimeMillis()-startTime )/1000);
+//            System.out.println("Total seconds:" + ( System.currentTimeMillis()-startTime )/1000);
+//            System.out.println("M=" + instance.eReservoirCapacity + " q=" + instance.q);
+//            System.out.println("Triangle estimate "+ instance.triangleCount);
+//            System.out.println("Triangle estimate/3 "+ instance.triangleCount/3);
+        }
+
+
     }
 }
 

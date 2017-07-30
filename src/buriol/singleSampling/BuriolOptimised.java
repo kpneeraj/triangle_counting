@@ -5,10 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Created by Neeraj on 11/4/2016.
@@ -22,21 +18,21 @@ public class BuriolOptimised {
     ArrayList<Sample> S = new ArrayList<Sample>();
 
     String inputFile;
-    int iteration,triangleCount, vertexCount, beta;
+    int memory,triangleCount, vertexCount, beta;
     double estimate;
     int A=0;
 
-    public BuriolOptimised( int iteration,String inputFile, int vertexCount){
+    public BuriolOptimised(int memory, String inputFile, int vertexCount){
         this.inputFile = inputFile;
-        this.iteration  = iteration;
+        this.memory = memory;
         this.vertexCount = vertexCount;
         //loadFileAndCollectVertices();
     }
 
     public int sampleTriangles(){
-        fileBuffer.add(0,"");
+       // fileBuffer.add(0,"");
         int s=0;
-        int x=1,m=1,M=iteration;
+        int x=1,m=1,M= memory;
         String edge; StringTokenizer st;
         int a=0,b=0;
 
@@ -147,7 +143,7 @@ public class BuriolOptimised {
     }
 
     public int getUniformVertexSample(){
-        return (new Random().nextInt(vertexCount)) ;
+        return (new Random().nextInt(vertexCount))+1 ;
     }
 
     public void insertIntoHash(String key, Sample sample){
@@ -180,13 +176,15 @@ public class BuriolOptimised {
         int vertexCount = 3997962;
 
         int medianCount = 1;
-        int testCases = 3;
-        int[] repetitions = {100000,
-                150000,
-                1500000};
+        //int testCases = 7;
+        int[] memory ={25190,
+                39538,
+                54426,
+                96942,
+                217742};
 
-        for(int testcase=0;testcase<testCases;testcase++){
-            int repetition = repetitions[testcase];
+        for(int testcase=0;testcase<memory.length;testcase++){
+            int repetition = memory[testcase];
             ArrayList<Double> estimates = new ArrayList<Double>();
             System.out.format("\n%-20s%-20s%-20s%-20s%-20s", "Iteration", "Repetitions", "Actual Count" , "Estimate","Time taken");
             for(int i=0;i<medianCount;i++){

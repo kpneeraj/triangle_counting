@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.StringTokenizer;
 
@@ -21,24 +22,30 @@ public class TriestBase {
         this.inputFile = inputFile;
         counter = new TriangleCounter();
         reservoir = new ArrayList<Edge>();
-
     }
 
     public int getReserviorCapacity(){
         return reservoirCapacity;
     }
 
+    /*
+        1: S ← ∅, t ← 0, τ ← 0 (done in constructor)
+        2: for each element (+, (u, v)) from Σ do
+        3: t ← t + 1
+        4: if SampleEdge((u, v), t) then
+        5: S ← S ∪ {(u, v)}
+        6: UpdateCounters(+, (u, v)) */
+
     public void execute(){
+
         String[] vertices= new String[2];
-
         //read the edge file
-
         BufferedReader br = null;
         try {
             String sCurrentLine;
             br = new BufferedReader(new FileReader(inputFile));
             while ((sCurrentLine = br.readLine()) != null) {
-                //vertices = sCurrentLine.split("\t");
+              //  double startTime = System.currentTimeMillis();
                 if(sCurrentLine.charAt(0)=='#') continue; // these are comment lines
                 StringTokenizer st = new StringTokenizer(sCurrentLine);
                 while (st.hasMoreTokens()) {
@@ -46,14 +53,14 @@ public class TriestBase {
                     vertices[1] = st.nextToken();
                 }
                 t++;
-//                if(vertices[0].equals("1")||vertices[1].equals("1"))
-//                    System.out.println(vertices[0]+","+vertices[1]);
                 Edge edge = new Edge(Integer.parseInt(vertices[0]),Integer.parseInt(vertices[1]));
                 if(sampleEdge(edge)){
                     reservoir.add(edge);
                     counter.updateCounter(edge,true);
-                 //   System.out.println("Adding edge" + edge.toString());
                 }
+              //  double end = System.currentTimeMillis();
+                // if( (end-startTime)/1000 >= 0.1)
+              //  System.out.println("Time for proccessing edge:" + (end-startTime)/1000);
             }
 
         } catch (IOException e) {
@@ -65,37 +72,24 @@ public class TriestBase {
                 ex.printStackTrace();
             }
         }
-
-
-        /*
-        1: S ← ∅, t ← 0, τ ← 0 (done in constructor)
-        2: for each element (+, (u, v)) from Σ do
-        3: t ← t + 1
-        4: if SampleEdge((u, v), t) then
-        5: S ← S ∪ {(u, v)}
-        6: UpdateCounters(+, (u, v))*/
     }
 
     private boolean sampleEdge(Edge edge) {
+      //  double startTime = System.currentTimeMillis();
         if(t<=reservoirCapacity){
             return true;
         }
         else{
             int random = (new Random().nextInt(t));
-            //Boolean isHead = <reservoirCapacity  ;
             if(random<reservoirCapacity){
-                int randomIndex = new Random().nextInt(reservoirCapacity);
-              //  System.out.println("deleting edge " + edge.toString());
-                counter.updateCounter(reservoir.get(randomIndex),false);
-                reservoir.remove(randomIndex);
-                reservoir.add(randomIndex,edge);
+                counter.updateCounter(reservoir.get(random),false);
+                reservoir.remove(random);
+                reservoir.add(random,edge);
                 return true;
             }
-            else{
-               // System.out.println("Failed to sample edge at t=" + t + "u,v = " + edge.getVertexU()+","+edge.getVertexV());
-
-            }
         }
+      //  double end = System.currentTimeMillis();
+      //  System.out.println("Time for sampling edge :" + (end-startTime)/1000);
         return false;
     }
 
@@ -112,5 +106,31 @@ public class TriestBase {
 
     public int getAbsoluteTriangleCOunt(){
         return counter.getGlobalCount();
+    }
+
+    public static void main(String args[]){
+        int medianCount =1;
+        String filename = "com-orkut.ungraph.txt";
+        int[] memory = {803039,
+                3303078,
+                6025929};
+
+        System.out.println("Triest Base - " + filename + "\n");
+
+        for(int trial = 0;trial<memory.length;trial++) {
+            double estimates[] = new double[medianCount];
+            System.out.format("%-20s%-20s%-20s%-20s%-20s", "Iteration", "Memory", "Exact count", "Estimate", "Time taken");
+            for (int i = 0; i < medianCount; i++) {
+                double startTime = System.currentTimeMillis();
+                TriestBase triestBase = new TriestBase(memory[trial],"graphs\\"+filename);
+                triestBase.execute();
+                estimates[i] = triestBase.getTriangleCount();
+                double endTime = System.currentTimeMillis();
+                System.out.format("\n%-20s%-20d%-20d%-20f%-20s", i, triestBase.getReserviorCapacity(), triestBase.getAbsoluteTriangleCOunt(), triestBase.getTriangleCount(),(endTime-startTime)/1000);
+            }
+
+            Arrays.sort(estimates);
+            System.out.println("\nMedian:" + estimates[medianCount / 2]);
+        }
     }
 }
