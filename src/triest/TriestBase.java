@@ -110,10 +110,13 @@ public class TriestBase {
 
     public static void main(String args[]){
         int medianCount =1;
-        String filename = "com-orkut.ungraph.txt";
-        int[] memory = {803039,
-                3303078,
-                6025929};
+        String filename = "com-dblp_undirected.txt";
+        int[] memory = {26000,
+                55000,
+                125000,
+                300000,
+                575000,
+                1075000};
 
         System.out.println("Triest Base - " + filename + "\n");
 

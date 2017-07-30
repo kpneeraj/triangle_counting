@@ -99,10 +99,8 @@ public class MultiSamplingMultiPass {
         int totalVertices = 317080;
         int iterations=1;
 
-        int[] ns = {150000, 1000, 2000, 2000,3000,3000,4000,4000,5000,5000,
-                    6000,6000,7000,7000,8000,8000,9000,9000,10000,10000};
-        int[] ms = {1000000, 10000, 10000, 20000, 20000, 40000, 40000, 60000, 60000, 80000,
-                80000, 100000, 100000, 120000, 120000, 140000, 140000,160000,160000,180000,200000};
+        int[] ns = {1000,  5000,   25000,   50000, 75000,   75000};
+        int[] ms = {25000,50000,100000,250000,500000,1000000};
 
         System.out.println("Multi pass multi sampling - " + filename + "\n");
 
@@ -110,7 +108,8 @@ public class MultiSamplingMultiPass {
             System.out.println("\n\nTEst case result for n=" + ns[testcase] + " and m="+ms[testcase]);
             MultiSamplingMultiPass r = new MultiSamplingMultiPass(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
             System.out.println("Multiple sampling algorithm:");
-            System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-40s%-20s%-20s", "Iteration", "Vertex memory(n)", "Edge memory(m)","Black edges sampled", "Total size", "Exact count", "Estimate","Error %","Time taken");
+            //System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-40s%-20s%-20s", "Iteration", "Vertex memory(n)", "Edge memory(m)","Black edges sampled", "Total size", "Exact count", "Estimate","Error %","Time taken");
+            System.out.format("\n%-20s,%-20s,%-20s,%-20s,%-20s,%-40s,%-20s,%-20s",  "Vertex memory(n)", "Edge memory(m)","Black edges sampled", "Total size", "Exact count", "Estimate","Error %","Time taken");
 
             double estimates[] = new double[iterations];
             for(int i=0;i<iterations;i++) {
@@ -123,7 +122,7 @@ public class MultiSamplingMultiPass {
                 r.getCounts();
                 estimates[i] = r.getEstimateCount();
                 double endTime = System.currentTimeMillis();
-                System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-40s%-20s%-20s", i, r.vreservoirCapcity, r.eReservoirCapacity, r.blueEdges, (r.vreservoirCapcity+ r.eReservoirCapacity) ,  r.triangleFormed.size(), estimates[i],( 2224385-estimates[i])/(double)2224385,(endTime-startTime)/1000);
+                System.out.format("\n%-20s,%-20s,%-20s,%-20s,%-20s,%-40s,%-20s,%-20s", r.vreservoirCapcity, r.eReservoirCapacity, r.blueEdges, (r.vreservoirCapcity+ r.eReservoirCapacity) ,  r.triangleFormed.size(), estimates[i],100*( 2224385-estimates[i])/(double)2224385,(endTime-startTime)/1000);
                 r.clearAll();
             }
 
@@ -138,7 +137,7 @@ public class MultiSamplingMultiPass {
     }
 
     public double getEstimateCount(){
-        int uTriangleCount = this.triangleFormed.size();
+        int uTriangleCount = triangleCount;//this.triangleFormed.size();
         double estimate = ((((double)totalEdges*(double)totalVertices))/((double)vreservoirCapcity*eReservoirCapacity))*(uTriangleCount/3);
         return estimate;
     }
