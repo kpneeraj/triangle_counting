@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * Created by Neeraj on 11/4/2016.
  */
-public class BuriolOptimised {
+public class BuriolEtAl {
 
    // ArrayList<Integer> vertices = new ArrayList<Integer>();
     ArrayList<String> fileBuffer = new ArrayList<String>();
@@ -22,7 +22,7 @@ public class BuriolOptimised {
     double estimate;
     int A=0;
 
-    public BuriolOptimised(int memory, String inputFile, int vertexCount){
+    public BuriolEtAl(int memory, String inputFile, int vertexCount){
         this.inputFile = inputFile;
         this.memory = memory;
         this.vertexCount = vertexCount;
@@ -189,7 +189,7 @@ public class BuriolOptimised {
             System.out.format("\n%-20s%-20s%-20s%-20s%-20s", "Iteration", "Repetitions", "Actual Count" , "Estimate","Time taken");
             for(int i=0;i<medianCount;i++){
                 double startTime = System.currentTimeMillis();
-                BuriolOptimised counter = new BuriolOptimised(repetition, "graphs\\"+filename, vertexCount);
+                BuriolEtAl counter = new BuriolEtAl(repetition, "graphs\\"+filename, vertexCount);
                 counter.sampleTriangles();
                 double endTime = System.currentTimeMillis();
                 estimates.add(counter.getEstimate());

@@ -6,7 +6,7 @@ import java.util.*;
 /**
  * Created by Neeraj on 10/16/2016.
  */
-public class Runner {
+public class MultiSamplingMultiPass {
     HashSet<Integer> vertexReservoir = new HashSet<Integer>();
     ArrayList<Edge> edgeReservoir = new ArrayList<Edge>();
     String inputFile;
@@ -20,7 +20,7 @@ public class Runner {
     //ArrayList<String> fileBuffer = new ArrayList<String>();
 
 
-    public Runner(int i, int i1, String s, int totalVertices) {
+    public MultiSamplingMultiPass(int i, int i1, String s, int totalVertices) {
         vreservoirCapcity = i;
         eReservoirCapacity = i1;
         inputFile=s;
@@ -47,14 +47,11 @@ public class Runner {
             if(i<vreservoirCapcity){
                 vertexReservoirList.add(i);
             }
-            else{
+            else {
                 int random = (new Random().nextInt(i));
-                //Boolean isHead = <reservoirCapacity  ;
                 if(random<vreservoirCapcity){
-                    int randomIndex = new Random().nextInt(vreservoirCapcity);
-                    vertexReservoirList.remove(randomIndex);
-                    vertexReservoirList.add(randomIndex,i);
-                    // true;
+                    vertexReservoirList.remove(random);
+                    vertexReservoirList.add(random,i);
                 }
             }
         }
@@ -87,58 +84,46 @@ public class Runner {
         if(totalEdges<=eReservoirCapacity){
             edgeReservoir.add(edge);
         }
-        else{
+        else {
             int random = (new Random().nextInt(totalEdges));
-            //Boolean isHead = <reservoirCapacity  ;
             if(random<eReservoirCapacity){
-                int randomIndex = new Random().nextInt(eReservoirCapacity);
-                edgeReservoir.remove(randomIndex);
-                edgeReservoir.add(randomIndex,edge);
-                // true;
+                edgeReservoir.remove(random);
+                edgeReservoir.add(random,edge);
             }
         }
-        //return false;
     }
 
     public static void main(String args[]){
         //constants for running the comparison
-        String filename="CA-CondMat.txt";
-        int totalVertices = 23133;
+        String filename="com-dblp_undirected.txt";
+        int totalVertices = 317080;
+        int iterations=1;
 
-      //  int n=50000, m=500000;
-        int iterations=3;
+        int[] ns = {150000, 1000, 2000, 2000,3000,3000,4000,4000,5000,5000,
+                    6000,6000,7000,7000,8000,8000,9000,9000,10000,10000};
+        int[] ms = {1000000, 10000, 10000, 20000, 20000, 40000, 40000, 60000, 60000, 80000,
+                80000, 100000, 100000, 120000, 120000, 140000, 140000,160000,160000,180000,200000};
 
-        int testCases = 4;
-        int[] ns = {23133,
-                2000,
-                5000,5000,
-                100000,
-                100000,
-                500000,
-                1000000};
-        int[] ms = {93497,20000,50000,100000,
-                250000,
-                500000,
-                1000000,
-                1000000,
-                5000000,
-                10000000 };
+        System.out.println("Multi pass multi sampling - " + filename + "\n");
 
-        for(int testcase=0;testcase<testCases;testcase++){
+        for(int testcase=0;testcase<ns.length;testcase++){
             System.out.println("\n\nTEst case result for n=" + ns[testcase] + " and m="+ms[testcase]);
-            Runner r = new Runner(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
+            MultiSamplingMultiPass r = new MultiSamplingMultiPass(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
             System.out.println("Multiple sampling algorithm:");
-            System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-20s", "Iteration", "Vertex memory(n)", "Edge memory(m)","Black edges sampled", "Exact count", "Estimate","Time taken");
+            System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-40s%-20s%-20s", "Iteration", "Vertex memory(n)", "Edge memory(m)","Black edges sampled", "Total size", "Exact count", "Estimate","Error %","Time taken");
 
             double estimates[] = new double[iterations];
             for(int i=0;i<iterations;i++) {
                 double startTime = System.currentTimeMillis();
                 r.sampleVertices();
+                double time1 = System.currentTimeMillis();
                 r.sampleEdges();
+                double time2 = System.currentTimeMillis();
+                double timeParsingFile = time2-time1;
                 r.getCounts();
                 estimates[i] = r.getEstimateCount();
                 double endTime = System.currentTimeMillis();
-                System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-20s", i, r.vreservoirCapcity, r.eReservoirCapacity, r.blueEdges, r.triangleFormed.size(), estimates[i],(endTime-startTime)/1000);
+                System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-40s%-20s%-20s", i, r.vreservoirCapcity, r.eReservoirCapacity, r.blueEdges, (r.vreservoirCapcity+ r.eReservoirCapacity) ,  r.triangleFormed.size(), estimates[i],( 2224385-estimates[i])/(double)2224385,(endTime-startTime)/1000);
                 r.clearAll();
             }
 
@@ -210,102 +195,30 @@ public class Runner {
                 int v = Integer.parseInt(vertices[1]);
                 isBlueCounted=false;
                 if(res1map.containsKey(u)){
-                    int l2vertex = v;
-                    int l1vertex = u;
-
-                    if(res2map.containsKey(l2vertex)) {
-                        VertexInfo vl3Info, ul3Info;
-                        //add all vertices from edgeReservoir
-                        vl3Info = res3map.get(v);
-                        ul3Info = res3map.get(u);
+                    if(res2map.containsKey(v)) {
                         isBlueCounted = true;
                         blueEdges++;
-                        if (vl3Info == null) {
-                            vl3Info = new VertexInfo(v);
-                            res3map.put(v, vl3Info);
-                        }
-                        if (ul3Info == null) {
-                            ul3Info = new VertexInfo(u);
-                            res3map.put(u, ul3Info);
-                        }
-
-                        vl3Info.neighbors.add(u);
-                        ul3Info.neighbors.add(v);
-
-                        HashSet<Integer> neighbors = res2map.get(l2vertex).neighbors;
-                        Iterator<Integer> neIter = neighbors.iterator();
-                        while (neIter.hasNext()){
-                            int currNeigh = neIter.next();
-
-                            if( res3map.get(currNeigh)!=null){
-                                HashSet<Integer> l3neighbors = res3map.get(currNeigh).neighbors;
-
-                                if(l3neighbors.contains(l1vertex)){
-                                    ArrayList<Integer> temp = new ArrayList<Integer>();
-                                    temp.add(l1vertex);
-                                    temp.add(l2vertex);
-                                    temp.add(currNeigh);
-                                    Collections.sort(temp);
-                                    Iterator<Integer> itr = temp.iterator();
-                                    StringBuffer str = new StringBuffer("");
-                                    while(itr.hasNext()){
-                                        str.append(Integer.toString(itr.next())).append(" ");
-                                    }
-                                    triangleFormed.add(str.toString());
-                                    triangleCount++;
-                                }
-                            }
-                        }
+                        HashSet<Integer> l2Neighbors = res2map.get(v).neighbors;
+                        HashSet<Integer> l1Neighbors = res1map.get(u).neighbors;
+                        l1Neighbors.add(v);
+                        HashSet<Integer> tempSet = new HashSet<Integer>(l1Neighbors);
+                        tempSet.retainAll(l2Neighbors);
+                        if(tempSet.size()>0)
+                            addTriangle(tempSet, u,v);
                     }
                 }
 
                 if(res1map.containsKey(v)){
-                    int l2vertex = u;
-                    int l1vertex = v;
-
-                    if(res2map.containsKey(l2vertex)) {
-                        VertexInfo vl3Info, ul3Info;
-                        //add all vertices from edgeReservoir
-                        vl3Info = res3map.get(v);
-                        ul3Info = res3map.get(u);
-                        if(!isBlueCounted ) // this check is required so that we do not add the edge count twice
+                    if(res2map.containsKey(u)) {
+                        if(!isBlueCounted)
                             blueEdges++;
-                        if (vl3Info == null) {
-                            vl3Info = new VertexInfo(v);
-                            res3map.put(v, vl3Info);
-                        }
-                        if (ul3Info == null) {
-                            ul3Info = new VertexInfo(u);
-                            res3map.put(u, ul3Info);
-                        }
-
-                        vl3Info.neighbors.add(u);
-                        ul3Info.neighbors.add(v);
-
-                        HashSet<Integer> neighbors = res2map.get(l2vertex).neighbors;
-                        Iterator<Integer> neIter = neighbors.iterator();
-                        while (neIter.hasNext()){
-                            int currNeigh = neIter.next();
-
-                            if( res3map.get(currNeigh)!=null){
-                                HashSet<Integer> l3neighbors = res3map.get(currNeigh).neighbors;
-
-                                if(l3neighbors.contains(l1vertex)){
-                                    ArrayList<Integer> temp = new ArrayList<Integer>();
-                                    temp.add(l1vertex);
-                                    temp.add(l2vertex);
-                                    temp.add(currNeigh);
-                                    Collections.sort(temp);
-                                    Iterator<Integer> itr = temp.iterator();
-                                    StringBuffer str = new StringBuffer("");
-                                    while(itr.hasNext()){
-                                        str.append(Integer.toString(itr.next())).append(" ");
-                                    }
-                                    triangleFormed.add(str.toString());
-                                    triangleCount++;
-                                }
-                            }
-                        }
+                        HashSet<Integer> l2Neighbors = res2map.get(u).neighbors;
+                        HashSet<Integer> l1Neighbors = res1map.get(v).neighbors;
+                        l1Neighbors.add(u);
+                        HashSet<Integer> tempSet = new HashSet<Integer>(l1Neighbors);
+                        tempSet.retainAll(l2Neighbors);
+                        if(tempSet.size()>0)
+                            addTriangle(tempSet, u,v);
                     }
                 }
             }
@@ -316,10 +229,34 @@ public class Runner {
 
     }
 
+
+    public void addTriangle(HashSet<Integer> vertices, int u, int v){
+        Iterator<Integer> itr = vertices.iterator();
+        int w;
+        while(itr.hasNext()){
+            w = itr.next();
+            int smallest, largest, middle;
+            smallest = Math.min(Math.min(u,v),w);
+            largest = Math.max(Math.max(u,v),w);
+            if(u!=smallest && u!=largest) middle = u;
+            else if(v!=smallest && v!=largest) middle = v;
+            else //if(w!=smallest && w!=largest)
+                middle = w;
+
+            triangleFormed.add(smallest+","+middle+","+largest);
+            triangleCount++;
+        }
+    }
+
     class Edge{
         int u,v;
         public Edge(int i, int j){
-            u=i;v=j;
+            if(i<j){
+                u=i;v=j;
+            }
+            else{
+                v=i;u=j;
+            }
         }
     }
 

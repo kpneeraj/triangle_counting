@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * Created by Neeraj on 2/8/2017.
  */
-public class EdgeVertexMultiSamplingSinglePass {
+public class MultiSamplingSinglePass {
     HashSet<Integer> vertexReservoir = new HashSet<Integer>();
     ArrayList<Edge> edgeReservoir = new ArrayList<Edge>();
     String inputFile;
@@ -21,7 +21,7 @@ public class EdgeVertexMultiSamplingSinglePass {
     //ArrayList<String> fileBuffer = new ArrayList<String>();
 
 
-    public EdgeVertexMultiSamplingSinglePass(int i, int i1, String s, int totalVertices) {
+    public MultiSamplingSinglePass(int i, int i1, String s, int totalVertices) {
         vreservoirCapcity = i;
         eReservoirCapacity = i1;
         inputFile=s;
@@ -270,7 +270,7 @@ public class EdgeVertexMultiSamplingSinglePass {
 
         for(int testcase=0;testcase<ns.length;testcase++){
             System.out.println("\n\nTest case result for n=" + ns[testcase] + " and m="+ms[testcase]);
-            EdgeVertexMultiSamplingSinglePass r = new EdgeVertexMultiSamplingSinglePass(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
+            MultiSamplingSinglePass r = new MultiSamplingSinglePass(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
 
             System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-20s%-40s", "Iteration", "Vertex memory(n)", "Edge memory(m)","Blue edges sampled", "Total memory","Exact count", "Estimate","Time taken");
 
