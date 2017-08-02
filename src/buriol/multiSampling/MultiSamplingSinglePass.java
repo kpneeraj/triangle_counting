@@ -11,7 +11,7 @@ public class MultiSamplingSinglePass {
     HashSet<Integer> vertexReservoir = new HashSet<Integer>();
     ArrayList<Edge> edgeReservoir = new ArrayList<Edge>();
     String inputFile;
-    int blackEdgeCount, totalVertices, triangleCount=0, totalEdges=0, vreservoirCapcity, eReservoirCapacity,blueEdges=0;
+    int blackEdgeCount, totalVertices, triangleCount=0, totalEdges=0, vreservoirCapcity, eReservoirCapacity;
     HashSet<String> triangleFormed = new HashSet<String>();
 
     //    HashMap<Integer,VertexInfo> res1map = new HashMap<Integer,VertexInfo>();
@@ -35,7 +35,7 @@ public class MultiSamplingSinglePass {
         res2map.clear();
         res3map.clear();
         triangleFormed.clear();
-        triangleCount=0; totalEdges=0;blueEdges=0;
+        triangleCount=0; totalEdges=0;
     }
 
     /***
@@ -211,7 +211,6 @@ public class MultiSamplingSinglePass {
         if(vertexReservoir.contains(u)){
             if(res2map.containsKey(v)) {
                 isBlueCounted = true;
-                blueEdges++;
                 blackEdgeCount++;
                 HashSet<Integer> l2Neighbors = res2map.get(v).neighbors;
                 if(res3map.get(u)==null) {
@@ -235,7 +234,6 @@ public class MultiSamplingSinglePass {
             if(res2map.containsKey(u)) {
                 if(!isBlueCounted){
                     blackEdgeCount++;
-                    blueEdges++;
                 }
 
                 HashSet<Integer> l2Neighbors = res2map.get(u).neighbors;
@@ -257,14 +255,28 @@ public class MultiSamplingSinglePass {
         }
     }
 
+    public double seeDuplicatesInReservoirs(){
+        double duplicates = 0;
+        for (Map.Entry<Integer,VertexInfo> entry : res2map.entrySet()) {
+            HashSet<Integer> neighbors1 = entry.getValue().neighbors;
+            if(res3map.get(entry.getKey())!=null){
+                HashSet<Integer> neighbors2 = res3map.get(entry.getKey()).neighbors;
+                HashSet<Integer> tempSet = new HashSet<Integer>(neighbors2);
+                tempSet.retainAll(neighbors1);
+                duplicates +=tempSet.size();
+            }
+        }
+        return duplicates;
+    }
+
     public static void main(String args[]) {
         //constants for running the comparison
-        String filename="com-orkut.ungraph.txt";
-        int totalVertices = 3072441;
+        String filename="com-dblp_undirected.txt";
+        int totalVertices = 317080;
         int iterations=1;
 
-        int[] ns = {10000, 50000, 75000, 100000, 200000};
-        int[] ms = {75000, 100000, 500000, 1000000, 5000000};
+        int[] ns = {317080,10000, 50000, 75000, 100000, 200000};
+        int[] ms = {1049866,75000, 100000, 500000, 1000000, 5000000};
 
         System.out.println("Multiple sampling algorithm - single pass" + filename+"\n");
 
@@ -285,9 +297,11 @@ public class MultiSamplingSinglePass {
                 //    r.getCounts();
                 estimates[i] = r.getEstimateCount();
                 double endTime = System.currentTimeMillis();
-                System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-20s%-40s", i, r.vreservoirCapcity, r.eReservoirCapacity, r.blueEdges,(r.vreservoirCapcity+ r.eReservoirCapacity+ r.blueEdges), r.triangleFormed.size(), estimates[i],(endTime-startTime)/1000);
+                System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-20s%-40s", i, r.vreservoirCapcity, r.eReservoirCapacity, r.blackEdgeCount,( r.eReservoirCapacity+ r.blackEdgeCount), r.triangleCount, estimates[i],(endTime-startTime)/1000);
                 System.out.println("\nCounted traingls:" + r.triangleCount);
                 System.out.println("\nUnique count:" + r.triangleFormed.size());
+                System.out.println("\nDupliacte count:" + r.seeDuplicatesInReservoirs());
+
                 r.clearAll();
             }
 
@@ -303,10 +317,10 @@ public class MultiSamplingSinglePass {
     }
 
     public double getEstimateCount(){
-        int uTriangleCount = this.triangleFormed.size();
+        int uTriangleCount = triangleCount;//this.triangleFormed.size();
         //    System.out.println("\nCounted traingls:" + triangleCount);
         // System.out.println("\nUique count:" + uTriangleCount);
-        double estimate = ((((double)totalEdges*(double)totalVertices))/((double)vreservoirCapcity*eReservoirCapacity))*(uTriangleCount/3);
+        double estimate = ((((double)totalEdges*(double)totalVertices))/((double)vreservoirCapcity*eReservoirCapacity))*(uTriangleCount)/2;
         return estimate;
     }
 

@@ -111,25 +111,25 @@ public class TriestBase {
     public static void main(String args[]){
         int medianCount =1;
         String filename = "com-dblp_undirected.txt";
-        int[] memory = {26000,
-                55000,
-                125000,
-                300000,
-                575000,
-                1075000};
+        int[] memory = {26758,
+                65562,
+                204009,
+                512802,
+                921138,
+                1434877};
 
         System.out.println("Triest Base - " + filename + "\n");
 
         for(int trial = 0;trial<memory.length;trial++) {
             double estimates[] = new double[medianCount];
-            System.out.format("%-20s%-20s%-20s%-20s%-20s", "Iteration", "Memory", "Exact count", "Estimate", "Time taken");
+            System.out.format("%-20s,%-20s,%-20s,%-20s,%-20s", "Memory", "Exact count", "Estimate","Error %","Time taken");
             for (int i = 0; i < medianCount; i++) {
                 double startTime = System.currentTimeMillis();
                 TriestBase triestBase = new TriestBase(memory[trial],"graphs\\"+filename);
                 triestBase.execute();
                 estimates[i] = triestBase.getTriangleCount();
                 double endTime = System.currentTimeMillis();
-                System.out.format("\n%-20s%-20d%-20d%-20f%-20s", i, triestBase.getReserviorCapacity(), triestBase.getAbsoluteTriangleCOunt(), triestBase.getTriangleCount(),(endTime-startTime)/1000);
+                System.out.format("\n%-20d,%-20d,%-20f,%-20s,%-20s", triestBase.getReserviorCapacity(), triestBase.getAbsoluteTriangleCOunt(), estimates[i],100*( 2224385-estimates[i])/(double)2224385,(endTime-startTime)/1000);
             }
 
             Arrays.sort(estimates);
