@@ -1,10 +1,12 @@
 package buriol.multiSampling;
 
+import sun.security.provider.certpath.Vertex;
+
 import java.io.*;
 import java.util.*;
 
 /**
- * Created by Neeraj on 10/16/2016.
+ * Created by Neeraj on 8/5/2017.
  */
 public class MsmpPQ {
     HashSet<Integer> vertexReservoir = new HashSet<Integer>();
@@ -82,56 +84,10 @@ public class MsmpPQ {
 
     }
 
-    public static void main(String args[]){
-        //constants for running the comparison
-        String filename="com-dblp_undirected.txt";
-        int totalVertices = 317080;
-        int totalEdges = 1049866;
-        int iterations=3;
-
-        double[] ns = {
-                5000,5000,25000,25000,75000,75000};
-        double[] ms = { 5000, 10000, 50000,100000,500000,1000000};
-
-        System.out.println("Multi pass multi sampling - " + filename + "\n");
-
-        for(int testcase=0;testcase<ns.length;testcase++){
-            System.out.println("\n\nTEst case result for n=" + ns[testcase] + " and m="+ms[testcase]);
-            MsmpPQ r = new MsmpPQ(ns[testcase]/totalVertices,ms[testcase]/totalEdges,"graphs\\"+filename, totalVertices);
-            System.out.println("Multiple sampling algorithm with fixed p and q:");
-            System.out.format("\n%-40s,%-40s,%-20s,%-20s,%-20s,%-20s,%-40s,%-20s,%-20s,%-20s",
-
-                    "p="+ns[testcase]+"/"+totalVertices, "q="+ms[testcase]+"/"+totalEdges, "Vertices sampled", "Red edges sampled" ,"Black edges sampled", "Total size",
-                    "Exact count", "Estimate", "Error %", "Time taken");
-
-            double estimates[] = new double[iterations];
-            for(int i=0;i<iterations;i++) {
-                double startTime = System.currentTimeMillis();
-                r.sampleVertices();
-                r.sampleEdges();
-                r.getCounts();
-                estimates[i] = r.getEstimateCount();
-                double endTime = System.currentTimeMillis();
-                System.out.format("\n%-40s,%-40s,%-20s,%-20s,%-20s,%-20s,%-40s,%-20s,%-20s,%-20s",
-                        r.p, r.q, r.vertexReservoir.size(), r.edgeReservoir.size(), r.blueEdges,
-                        (r.edgeReservoir.size() + r.blueEdges) ,  r.triangleCount, estimates[i],
-                        100*( 2224385-estimates[i])/(double)2224385,(endTime-startTime)/1000);
-                r.clearAll();
-            }
-
-            Arrays.sort(estimates);
-            System.out.println("\nMedian:" + estimates[iterations/2]);
-            double sum=0;
-            for(int i=0;i<iterations;i++) {
-                sum+=estimates[i];
-            }
-            System.out.println("\nAverage:" + sum/iterations);
-        }
-    }
-
     public double getEstimateCount(){
-        int uTriangleCount = triangleCount;//this.triangleFormed.size();
-        return  uTriangleCount / (3*p*q);
+        int uTriangleCount = this.triangleFormed.size();
+        //1 -(1-pq)^3
+        return  uTriangleCount / ( 1 - Math.pow((1-p*q),3));
     }
 
 
@@ -219,7 +175,6 @@ public class MsmpPQ {
         }
     }
 
-
     public void addTriangle(HashSet<Integer> vertices, int u, int v){
         Iterator<Integer> itr = vertices.iterator();
         int w;
@@ -259,4 +214,62 @@ public class MsmpPQ {
         }
 
     }
+
+
+    public static void main(String args[]){
+        //constants for running the comparison
+        String filename="com-livejournal.ungraph.txt";
+        int totalVertices = 3997962;
+        int totalEdges = 34681189;
+        int actualTriangleCount= 177820130; //this is used only for error % calculation
+        int iterations=5;
+
+        double[] ns = {
+                        0.01, 0.05, 0.1, 0.15, 0.2,
+                        0.01, 0.05, 0.1, 0.15, 0.2,
+                        0.01, 0.05, 0.1, 0.15, 0.2,
+                        0.01, 0.05, 0.1, 0.15, 0.2,
+                        0.01, 0.05, 0.1, 0.15, 0.2};
+        double[] ms = { 0.01, 0.01,0.01,0.01,0.01,
+                        0.05, 0.05,0.05,0.05,0.05,
+                        0.1,0.1,0.1,0.1,0.1,
+                        0.15 ,0.15 ,0.15 ,0.15 ,0.15 ,
+                        0.2,0.2,0.2,0.2,0.2};
+        System.out.println("Multi pass multi sampling PQ version- " + filename + "\n");
+
+        for(int testcase=0;testcase<ns.length;testcase++){
+            System.out.println("\n\nTEst case result for n=" + ns[testcase] + " and m="+ms[testcase]);
+            MsmpPQ r = new MsmpPQ(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
+            System.out.println("Multiple sampling algorithm with fixed p and q:");
+            System.out.format("\n%-10s,%-10s,%-20s,%-20s,%-20s,%-15s,%-15s,%-15s,%-15s,%-20s",
+
+                    "p="+ns[testcase], "q="+ms[testcase], "Vertices sampled", "Red edges sampled" ,"Black edges sampled", "Total size",
+                    "Exact count", "Estimate", "Error %", "Time taken");
+
+            double estimates[] = new double[iterations];
+            for(int i=0;i<iterations;i++) {
+                double startTime = System.currentTimeMillis();
+                r.sampleVertices();
+                r.sampleEdges();
+                r.getCounts();
+                estimates[i] = r.getEstimateCount();
+                double endTime = System.currentTimeMillis();
+                System.out.format("\n%-10s,%-10s,%-20s,%-20s,%-20s,%-15s,%-15s,%-15s,%-15s,%-20s",
+                        r.p, r.q, r.vertexReservoir.size(), r.edgeReservoir.size(), r.blueEdges,
+                        (r.edgeReservoir.size() + r.blueEdges) ,  r.triangleFormed.size(), estimates[i],
+                        100*( actualTriangleCount-estimates[i])/(double)actualTriangleCount,(endTime-startTime)/1000);
+                r.clearAll();
+            }
+
+
+            Arrays.sort(estimates);
+            System.out.println("\nMedian:" + estimates[iterations/2]);
+            double sum=0;
+            for(int i=0;i<iterations;i++) {
+                sum+=estimates[i];
+            }
+            System.out.println("Average:" + sum/iterations);
+        }
+    }
+
 }

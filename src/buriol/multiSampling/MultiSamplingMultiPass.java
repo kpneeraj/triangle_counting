@@ -95,13 +95,69 @@ public class MultiSamplingMultiPass {
 
     public static void main(String args[]){
         //constants for running the comparison
-        String filename="com-dblp_undirected.txt";
-        int totalVertices = 317080; //1,806,067,135   4,173,724,142
-        int iterations=3;
+        String filename="as-skitter_undirected.txt";
+        int totalVertices = 1696415; //1,806,067,135   4,173,724,142
+        double actualTriangleCount =28769868; //this is used only for the error % calculation
+        int iterations=5;
 
-        int[] ns = {
-                5072,4979,24843,25072,75135,74916};
-        int[] ms = { 5031, 9920, 50012, 100525, 500558, 1000441};
+        int[] ns = {17007,
+                84075,
+                169436,
+                254541,
+                339566,
+
+                17192,
+                84502,
+                170230,
+                254944,
+                339635,
+
+                17103,
+                85031,
+                169404,
+                254932,
+                338399,
+
+                17151,
+                85139,
+                170816,
+                254110,
+                338495,
+
+                16803,
+                84791,
+                169304,
+                253910,
+                338334};
+        int[] ms = { 110996,
+                110931,
+                110751,
+                111190,
+                111086,
+
+                555005,
+                553972,
+                553729,
+                554807,
+                554758,
+
+                1108626,
+                1111017,
+                1109780,
+                1109176,
+                1109459,
+
+                1663134,
+                1665772,
+                1664424,
+                1663646,
+                1663424,
+
+                2217721,
+                2220126,
+                2219619,
+                2219002,
+                2218330};
 
         System.out.println("Multi pass multi sampling - " + filename + "\n");
 
@@ -123,7 +179,7 @@ public class MultiSamplingMultiPass {
                 r.getCounts();
                 estimates[i] = r.getEstimateCount();
                 double endTime = System.currentTimeMillis();
-                System.out.format("\n%-20s,%-20s,%-20s,%-20s,%-20s,%-40s,%-20s,%-20s", r.vreservoirCapcity, r.eReservoirCapacity, r.blueEdges, (r.eReservoirCapacity + r.blueEdges) ,  r.triangleCount, estimates[i],100*( 2224385-estimates[i])/(double)2224385,(endTime-startTime)/1000);
+                System.out.format("\n%-20s,%-20s,%-20s,%-20s,%-20s,%-40s,%-20s,%-20s", r.vreservoirCapcity, r.eReservoirCapacity, r.blueEdges, (r.eReservoirCapacity + r.blueEdges) ,  r.triangleFormed.size(), estimates[i],100*( actualTriangleCount-estimates[i])/(double)actualTriangleCount,(endTime-startTime)/1000);
                 r.clearAll();
             }
 
@@ -138,7 +194,7 @@ public class MultiSamplingMultiPass {
     }
 
     public double getEstimateCount(){
-        int uTriangleCount = triangleCount;//this.triangleFormed.size();
+        int uTriangleCount = this.triangleFormed.size();
         double estimate = ((((double)totalEdges*(double)totalVertices))/((double)vreservoirCapcity*eReservoirCapacity))*(uTriangleCount/3);
         return estimate;
     }
