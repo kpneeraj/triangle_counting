@@ -224,16 +224,9 @@ public class MsmpPQ {
         int actualTriangleCount= 177820130; //this is used only for error % calculation
         int iterations=5;
 
-        double[] ns = {
-                        0.01, 0.05, 0.1, 0.15, 0.2,
-                        0.01, 0.05, 0.1, 0.15, 0.2,
-                        0.01, 0.05, 0.1, 0.15, 0.2,
-                        0.01, 0.05, 0.1, 0.15, 0.2,
+        double[] ns = {0.15, 0.2,
                         0.01, 0.05, 0.1, 0.15, 0.2};
-        double[] ms = { 0.01, 0.01,0.01,0.01,0.01,
-                        0.05, 0.05,0.05,0.05,0.05,
-                        0.1,0.1,0.1,0.1,0.1,
-                        0.15 ,0.15 ,0.15 ,0.15 ,0.15 ,
+        double[] ms = {0.15 ,0.15 ,
                         0.2,0.2,0.2,0.2,0.2};
         System.out.println("Multi pass multi sampling PQ version- " + filename + "\n");
 

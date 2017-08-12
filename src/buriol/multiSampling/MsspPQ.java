@@ -119,6 +119,7 @@ public class MsspPQ {
                 tempSet.retainAll(l2Neighbors);
                 if(tempSet.size()>0)
                     addTriangle(tempSet, u,v);
+                tempSet = null; //force garabage collector
             }
         }
 
@@ -143,42 +144,62 @@ public class MsspPQ {
                 tempSet.retainAll(l2Neighbors);
                 if(tempSet.size()>0)
                     addTriangle(tempSet, u,v);
+                tempSet=null;//force garabage collector
             }
         }
     }
 
-    public double seeDuplicatesInReservoirs(){
-        double duplicates = 0;
-        for (Map.Entry<Integer,VertexInfo> entry : res2map.entrySet()) {
-            HashSet<Integer> neighbors1 = entry.getValue().neighbors;
-            if(res3map.get(entry.getKey())!=null){
-                HashSet<Integer> neighbors2 = res3map.get(entry.getKey()).neighbors;
-                HashSet<Integer> tempSet = new HashSet<Integer>(neighbors2);
-                tempSet.retainAll(neighbors1);
-                duplicates +=tempSet.size();
-            }
-        }
-        return duplicates;
-    }
+//    public double seeDuplicatesInReservoirs(){
+//        double duplicates = 0;
+//        for (Map.Entry<Integer,VertexInfo> entry : res2map.entrySet()) {
+//            HashSet<Integer> neighbors1 = entry.getValue().neighbors;
+//            if(res3map.get(entry.getKey())!=null){
+//                HashSet<Integer> neighbors2 = res3map.get(entry.getKey()).neighbors;
+//                HashSet<Integer> tempSet = new HashSet<Integer>(neighbors2);
+//                tempSet.retainAll(neighbors1);
+//                duplicates +=tempSet.size();
+//            }
+//        }
+//        return duplicates;
+//    }
+//
+//    public int getEndCount(){
+//        Iterator<Edge> itr = edgeReservoir.iterator();
+//        int count=0;
+//        while(itr.hasNext()){
+//            Edge e = itr.next();
+//            int u = e.u, v=e.v;
+//            if(res3map.get(u) !=null && res3map.get(v) !=null)
+//            {
+//            HashSet<Integer> list1 = res3map.get(u).neighbors;
+//            HashSet<Integer> list2 = res3map.get(v).neighbors;
+//                HashSet<Integer> temp = new  HashSet<Integer>(list2);
+//                temp.retainAll(list1);
+//                count+=temp.size();
+//            }
+//        }
+//        return count;
+//    }
+
 
     public static void main(String args[]) {
         //constants for running the comparison
-        String filename="web-BerkStan_undirected.txt";
-        int totalVertices = 685230;
-        int actualCount=64690980; //this is used only for the error % calculation
+        String filename="com-amazon_undirected.txt";
+        int totalVertices = 334863;
+        int actualCount=667129; //this is used only for the error % calculation
         int iterations=5;
 
-        double[] ns = {
+        double[] ns = {1,
                 0.01, 0.05, 0.1, 0.15, 0.2,
                 0.01, 0.05, 0.1, 0.15, 0.2,
                 0.01, 0.05, 0.1, 0.15, 0.2,
                 0.01, 0.05, 0.1, 0.15, 0.2,
-                0.01, 0.05, 0.1, 0.15, 0.2 };
-        double[] ms = { 0.01, 0.01,0.01,0.01,0.01,
+                0.01, 0.05, 0.1, 0.15, 0.2};
+        double[] ms = {1, 0.01, 0.01,0.01,0.01,0.01,
                 0.05, 0.05,0.05,0.05,0.05,
                 0.1,0.1,0.1,0.1,0.1,
                 0.15 ,0.15 ,0.15 ,0.15 ,0.15 ,
-                0.2,0.2,0.2,0.2,0.2 };
+                0.2,0.2,0.2,0.2,0.2};
 
         System.out.println("Multiple sampling single pass - PQ version : " + filename+"\n");
 
@@ -198,7 +219,7 @@ public class MsspPQ {
                         r.p,r.q,r.vertexReservoir.size(), r.edgeReservoir.size(),r.blackEdgeCount, r.edgeReservoir.size()+r.blackEdgeCount,
                         r.triangleFormed.size(), estimates[i], 100*(estimates[i] - actualCount)/(double)actualCount  ,(endTime-startTime)/1000);
 
-               // System.out.println("\nCounted triangle:" + r.triangleCount);
+             //  System.out.println("\nCounted triangle:" + r.getEndCount());
              //   System.out.println("\nUnique count:" + r.triangleFormed.size());
               //  System.out.println("\nDupliacte count:" + r.seeDuplicatesInReservoirs());
                 r.clearAll();
