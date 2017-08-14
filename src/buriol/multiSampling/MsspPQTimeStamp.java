@@ -1,11 +1,8 @@
 package buriol.multiSampling;
 
-import sun.misc.MessageUtils;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -143,9 +140,8 @@ public class MsspPQTimeStamp {
         }
     }
 
-    public int countTriangles() {
+    public void countTriangles() {
         Iterator<Edge> itr = edgeReservoir.iterator();
-        int count=0;
         while(itr.hasNext()){
             Edge e = itr.next();
             int u = e.u, v=e.v;
@@ -163,14 +159,10 @@ public class MsspPQTimeStamp {
                     addTriangle(vNeighbors, u,v);
             }
         }
-        return count;
     }
 
     private HashSet getNeighborsAfterTimeStamp(HashSet<EdgeInfo> neighbors, int timeStamp) {
         Set<EdgeInfo> e = neighbors.stream().filter(o -> o.timeStamp >= timeStamp).collect(Collectors.toSet());
-//        if(neighbors.size() > e.size()){
-//            int llll=0;
-//        }
         return (HashSet)e;
     }
 
@@ -252,8 +244,6 @@ public class MsspPQTimeStamp {
 
     public double getEstimateCount(){
         int uTriangleCount = this.triangleFormed.size();
-        //    System.out.println("\nCounted traingls:" + triangleCount);
-        // System.out.println("\nUique count:" + uTriangleCount);
         double estimate = uTriangleCount/(p*q);
         return estimate;
     }
