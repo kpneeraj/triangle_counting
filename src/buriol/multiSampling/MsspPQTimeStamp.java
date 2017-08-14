@@ -188,8 +188,18 @@ public class MsspPQTimeStamp {
         int actualCount=627584181; //this is used only for the error % calculation
         int iterations=5;
 
-        double[] ns = { 0.2};
-        double[] ms = {0.2};
+        double[] ns = {
+                0.01, 0.05, 0.1, 0.15, 0.2,
+                0.01, 0.05, 0.1, 0.15, 0.2,
+                0.01, 0.05, 0.1, 0.15, 0.2,
+                0.01, 0.05, 0.1, 0.15, 0.2,
+                0.01, 0.05, 0.1, 0.15, 0.2};
+        double[] ms = { 0.01, 0.01,0.01,0.01,0.01,
+                0.05, 0.05,0.05,0.05,0.05,
+                0.1,0.1,0.1,0.1,0.1,
+                0.15 ,0.15 ,0.15 ,0.15 ,0.15 ,
+                0.2,0.2,0.2,0.2,0.2};
+
 
         System.out.println("Multiple sampling single pass - PQ version : " + filename+"\n");
         ArrayList<String> outputTable = new ArrayList<String>();
