@@ -3,10 +3,7 @@ package triest;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * Created by Neeraj on 10/5/2016.
@@ -107,33 +104,87 @@ public class TriestBase {
     public int getAbsoluteTriangleCOunt(){
         return counter.getGlobalCount();
     }
+//
+//    public static void main(String args[]){
+//        int medianCount =1;
+//        String filename = "com-dblp_undirected.txt";
+//        int[] memory = {26758,
+//                65562,
+//                204009,
+//                512802,
+//                921138,
+//                1434877};
+//
+//        System.out.println("Triest Base - " + filename + "\n");
+//
+//        for(int trial = 0;trial<memory.length;trial++) {
+//            double estimates[] = new double[medianCount];
+//            System.out.format("%-20s,%-20s,%-20s,%-20s,%-20s", "Memory", "Exact count", "Estimate","Error %","Time taken");
+//            for (int i = 0; i < medianCount; i++) {
+//                double startTime = System.currentTimeMillis();
+//                TriestBase triestBase = new TriestBase(memory[trial],"graphs\\"+filename);
+//                triestBase.execute();
+//                estimates[i] = triestBase.getTriangleCount();
+//                double endTime = System.currentTimeMillis();
+//                System.out.format("\n%-20d,%-20d,%-20f,%-20s,%-20s", triestBase.getReserviorCapacity(), triestBase.getAbsoluteTriangleCOunt(), estimates[i],100*( 2224385-estimates[i])/(double)2224385,(endTime-startTime)/1000);
+//            }
+//
+//            Arrays.sort(estimates);
+//            System.out.println("\nMedian:" + estimates[medianCount / 2]);
+//        }
+//    }
 
     public static void main(String args[]){
-        int medianCount =1;
-        String filename = "com-dblp_undirected.txt";
-        int[] memory = {26758,
-                65562,
-                204009,
-                512802,
-                921138,
-                1434877};
-
-        System.out.println("Triest Base - " + filename + "\n");
-
-        for(int trial = 0;trial<memory.length;trial++) {
-            double estimates[] = new double[medianCount];
-            System.out.format("%-20s,%-20s,%-20s,%-20s,%-20s", "Memory", "Exact count", "Estimate","Error %","Time taken");
-            for (int i = 0; i < medianCount; i++) {
+        String filename="com-live-journal_simplified.txt";
+        int vertexCount = 3997962;
+        int actualTriangleCount= 177820130; //this is used only for error % calculation
+        int iterations = 1;
+        //int testCases = 7;
+        int[] memory ={ 25190,
+                39538,
+                54426,
+                96942,
+                217742,
+                1000000 };
+        ArrayList<String> outputTable = new ArrayList<String>();
+        System.out.println("Triest Base algorithm- " + filename + "\n");
+        for(int testcase=0;testcase<memory.length;testcase++){
+            HashMap<Double,String> currOutputMap = new HashMap<Double,String> ();
+            int M = memory[testcase];
+            double estimates[] = new double[iterations];
+            System.out.format("%-20s,%-20s,%-20s,%-20s,%-20s\n", "Memory", "Exact count", "Estimate","Error %","Time taken");
+            for(int i=0;i<iterations;i++){
                 double startTime = System.currentTimeMillis();
-                TriestBase triestBase = new TriestBase(memory[trial],"graphs\\"+filename);
-                triestBase.execute();
-                estimates[i] = triestBase.getTriangleCount();
+                TriestBase counter = new TriestBase(M, "graphs\\"+filename);
+                counter.execute();
                 double endTime = System.currentTimeMillis();
-                System.out.format("\n%-20d,%-20d,%-20f,%-20s,%-20s", triestBase.getReserviorCapacity(), triestBase.getAbsoluteTriangleCOunt(), estimates[i],100*( 2224385-estimates[i])/(double)2224385,(endTime-startTime)/1000);
-            }
+                estimates[i]=(counter.getTriangleCount());
+                String op = String.format("%-20s,%-20s,%-20s,%-20s,%-20s", counter.getReserviorCapacity(), counter.getAbsoluteTriangleCOunt(), estimates[i],100*( actualTriangleCount-estimates[i])/(double)actualTriangleCount,(endTime-startTime)/1000);
 
+                System.out.println(op);
+                currOutputMap.put(estimates[i],op);
+            }
             Arrays.sort(estimates);
-            System.out.println("\nMedian:" + estimates[medianCount / 2]);
+            System.out.println("\nMedian:" + estimates[iterations/2]);
+            double sum=0;
+            for(int i=0;i<iterations;i++) {
+                sum+=estimates[i];
+            }
+            System.out.println("Average:" + sum/iterations);
+            outputTable.add(currOutputMap.get(estimates[iterations/2])+",   "+sum/iterations);
+            printOutputs(outputTable);
         }
+    }
+
+    public static void printOutputs(ArrayList<String> outList){
+        System.out.println("################ Consolidated result till now: ###############");
+
+        System.out.format("\n%-20s,%-20s,%-20s,%-20s,%-20s,%-20s\n", "Memory", "Actual Count" , "Estimate","Error %","Time taken","Average");
+
+        Iterator<String> itr  = outList.iterator();
+        while(itr.hasNext()){
+            System.out.println(itr.next());
+        }
+        System.out.println("################################################################");
     }
 }

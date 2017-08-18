@@ -172,31 +172,56 @@ public class BuriolEtAl {
 
     public static void main(String args[]){
         //constants for running the comparison
-        String filename="com-livejournal.ungraph.txt";
+        String filename="com-live-journal_simplified.txt";
         int vertexCount = 3997962;
-
-        int medianCount = 1;
+        int actualTriangleCount= 177820130; //this is used only for error % calculation
+        int iterations = 1;
         //int testCases = 7;
-        int[] memory ={25190,
-                39538,
-                54426,
-                96942,
-                217742};
-
+        int[] memory ={ 50000,
+                        100000,
+                        500000,
+                        750000,
+                        1000000,
+                        2500000 };
+        ArrayList<String> outputTable = new ArrayList<String>();
+        System.out.println("Buriol et Al- " + filename + "\n");
         for(int testcase=0;testcase<memory.length;testcase++){
+            HashMap<Double,String> currOutputMap = new HashMap<Double,String> ();
             int repetition = memory[testcase];
-            ArrayList<Double> estimates = new ArrayList<Double>();
-            System.out.format("\n%-20s%-20s%-20s%-20s%-20s", "Iteration", "Repetitions", "Actual Count" , "Estimate","Time taken");
-            for(int i=0;i<medianCount;i++){
+            double estimates[] = new double[iterations];
+            System.out.format("\n%-20s,%-20s,%-20s,%-20s\n",  "Memory", "Actual Count" , "Estimate","Error %","Time taken");
+            for(int i=0;i<iterations;i++){
                 double startTime = System.currentTimeMillis();
                 BuriolEtAl counter = new BuriolEtAl(repetition, "graphs\\"+filename, vertexCount);
                 counter.sampleTriangles();
                 double endTime = System.currentTimeMillis();
-                estimates.add(counter.getEstimate());
-                System.out.format("\n%-20s%-20s%-20s%-20s%-20s", i, repetition,counter.beta,counter.estimate  ,(endTime-startTime)/1000);
+                estimates[i]=(counter.getEstimate());
+                String op = String.format("%-20s,%-20s,%-20s,%-20s,%-20s", repetition,counter.beta,counter.estimate  ,  100*( actualTriangleCount-estimates[i])/(double)actualTriangleCount,(endTime-startTime)/1000);
+
+                System.out.println(op);
+                currOutputMap.put(estimates[i],op);
             }
-            Collections.sort(estimates);
-            System.out.println("\nMedian : " + estimates.get(medianCount/2));
+            Arrays.sort(estimates);
+            System.out.println("\nMedian:" + estimates[iterations/2]);
+            double sum=0;
+            for(int i=0;i<iterations;i++) {
+                sum+=estimates[i];
+            }
+            System.out.println("Average:" + sum/iterations);
+            outputTable.add(currOutputMap.get(estimates[iterations/2])+",   "+sum/iterations);
+            printOutputs(outputTable);
         }
+    }
+
+    public static void printOutputs(ArrayList<String> outList){
+        System.out.println("################ Consolidated result till now: ###############");
+
+        System.out.format("\n%-20s,%-20s,%-20s,%-20s,%-20s,%-20s\n", "Repetitions", "Actual Count" , "Estimate","Error %","Time taken","Average");
+
+        Iterator<String> itr  = outList.iterator();
+        while(itr.hasNext()){
+            System.out.println(itr.next());
+        }
+        System.out.println("################################################################");
     }
 }

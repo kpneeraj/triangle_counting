@@ -1,4 +1,4 @@
-package buriol.multiSampling;
+package buriol.multiSampling.singlePass;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * Created by Neeraj on 2/8/2017.
  */
-public class MultiSamplingSinglePass {
+public class ReservoirSampling {
     HashSet<Integer> vertexReservoir = new HashSet<Integer>();
     ArrayList<Edge> edgeReservoir = new ArrayList<Edge>();
     String inputFile;
@@ -21,7 +21,7 @@ public class MultiSamplingSinglePass {
     //ArrayList<String> fileBuffer = new ArrayList<String>();
 
 
-    public MultiSamplingSinglePass(int i, int i1, String s, int totalVertices) {
+    public ReservoirSampling(int i, int i1, String s, int totalVertices) {
         vreservoirCapcity = i;
         eReservoirCapacity = i1;
         inputFile=s;
@@ -282,7 +282,7 @@ public class MultiSamplingSinglePass {
 
         for(int testcase=0;testcase<ns.length;testcase++){
             System.out.println("\n\nTest case result for n=" + ns[testcase] + " and m="+ms[testcase]);
-            MultiSamplingSinglePass r = new MultiSamplingSinglePass(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
+            ReservoirSampling r = new ReservoirSampling(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
 
             System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-20s%-40s", "Iteration", "Vertex memory(n)", "Edge memory(m)","Blue edges sampled", "Total memory","Exact count", "Estimate","Time taken");
 

@@ -1,4 +1,4 @@
-package buriol.multiSampling;
+package buriol.multiSampling.singlePass;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -6,20 +6,21 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Created by Neeraj on 8/9/2017.
+ * Created by Neeraj on 8/14/2017.
  */
-public class MsspPQTimeStamp {
+public class PQSamplingWithTimeStampAllTriangles {
 
     HashSet<Integer> vertexReservoir = new HashSet<Integer>();
     ArrayList<Edge> edgeReservoir = new ArrayList<Edge>();
     String inputFile;
     double p,q;
-    int blackEdgeCount, totalVertices, triangleCount=0, totalEdges=0;
+    int blackEdgeCount, totalVertices, totalTriangleCount=0, redBlackTriangleCount=0, redTriangleCount=0, totalEdges=0;
     HashSet<String> triangleFormed = new HashSet<String>();
     HashMap<Integer,HashSet<EdgeInfo>> res2map= new HashMap<Integer,HashSet<EdgeInfo>>();
     HashMap<Integer,HashSet<EdgeInfo>> res3map= new HashMap<Integer,HashSet<EdgeInfo>>();
+    EdgeInfo compareObject = new EdgeInfo(0,-1); //this is used so that we need not create new objects everytime when searching for vertices
 
-    public MsspPQTimeStamp(double p, double q, String s, int totalVertices) {
+    public PQSamplingWithTimeStampAllTriangles(double p, double q, String s, int totalVertices) {
         this.p=p;
         this.q=q;
         this.totalVertices = totalVertices;
@@ -32,7 +33,8 @@ public class MsspPQTimeStamp {
         res2map.clear();
         res3map.clear();
         triangleFormed.clear();
-        triangleCount=0; totalEdges=0;
+        totalTriangleCount=0; totalEdges=0;
+        redBlackTriangleCount=0; redTriangleCount=0;
     }
 
     /***
@@ -109,7 +111,7 @@ public class MsspPQTimeStamp {
                 /** Notes to developer:
                  *  Add the black edge.
                  *  We add only one way, i.e from redEdge vertex to vertexReservoir for optimisation.
-                 *  This is in reverse of the multipass optimisation technique.
+                 *  This is in reverse of the multiPass optimisation technique.
                  * **/
                 HashSet<EdgeInfo> vNeighbors = res3map.get(v);
                 if(vNeighbors==null) {
@@ -128,7 +130,7 @@ public class MsspPQTimeStamp {
                 /** Notes to developer:
                  *  Add the black edge.
                  *  We add only one way, i.e from redEdge vertex to vertexReservoir for optimisation.
-                 *  This is in reverse of the multipass optimisation technique.
+                 *  This is in reverse of the multiPass optimisation technique.
                  * **/
                 HashSet<EdgeInfo> uNeighbors = res3map.get(u);
                 if(uNeighbors==null) {
@@ -141,6 +143,7 @@ public class MsspPQTimeStamp {
     }
 
     public void countTriangles() {
+        //Count all red black triangles
         Iterator<Edge> itr = edgeReservoir.iterator();
         while(itr.hasNext()){
             Edge e = itr.next();
@@ -159,6 +162,25 @@ public class MsspPQTimeStamp {
                     addTriangle(vNeighbors, u,v);
             }
         }
+        redBlackTriangleCount = triangleFormed.size();
+
+        //Count all red triangles
+        itr = edgeReservoir.iterator();
+        while(itr.hasNext()){
+            Edge e = itr.next();
+            int u = e.u, v=e.v;
+
+            HashSet<EdgeInfo> vNeighborSet = res2map.get(v);
+            HashSet<EdgeInfo> uNeighborSet = res2map.get(u);
+
+            if(vNeighborSet!=null && uNeighborSet!=null){
+                HashSet<EdgeInfo> uNeighbors = new HashSet(uNeighborSet);
+                uNeighbors.retainAll(vNeighborSet );
+                if(uNeighbors.size()>0)
+                    addTriangle(uNeighbors, u,v);
+            }
+        }
+        redTriangleCount = triangleFormed.size() - redBlackTriangleCount;
     }
 
     private HashSet getNeighborsAfterTimeStamp(HashSet<EdgeInfo> neighbors, int timeStamp) {
@@ -168,16 +190,17 @@ public class MsspPQTimeStamp {
 
     public int getTimeStampOfEdgeInRes2(int u, int v){
         HashSet<EdgeInfo> edgeSet = res2map.get(u);
-        EdgeInfo vEdgeInfo = edgeSet.stream().filter(o -> o.equals(new EdgeInfo(v,-1))).collect(Collectors.toList()).iterator().next();
+        compareObject.vertex = v;
+        EdgeInfo vEdgeInfo = edgeSet.stream().filter(o -> o.equals(compareObject)).collect(Collectors.toList()).iterator().next();
         return vEdgeInfo.timeStamp;
     }
 
 
     public static void main(String args[]) {
         //constants for running the comparison
-        String filename="com-orkut.ungraph.txt";
-        int totalVertices = 3072441;
-        int actualCount=627584181; //this is used only for the error % calculation
+        String filename="com-amazon_simplified.txt";
+        int totalVertices = 334863;
+        int actualCount=667129; //this is used only for the error % calculation
         int iterations=5;
 
         double[] ns = {
@@ -192,37 +215,36 @@ public class MsspPQTimeStamp {
                 0.15 ,0.15 ,0.15 ,0.15 ,0.15 ,
                 0.2,0.2,0.2,0.2,0.2};
 
-
-        System.out.println("Multiple sampling single pass - PQ version : " + filename+"\n");
+        System.out.println("Multiple sampling single pass - PQ version with time stamp - all triangles  : " + filename+"\n");
         ArrayList<String> outputTable = new ArrayList<String>();
         for(int testcase=0;testcase<ns.length;testcase++){
             HashMap<Double,String> currOutputMap = new HashMap<Double,String> ();
-            System.out.format("\n%-10s,%-10s,%-10s,%-15s,%-15s,%-15s,%-20s,%-30s,%-20s,%-20s\n",
-                    "p","q","Vertices", "Edges","Black edges", "Total memory","Exact count", "Estimate","Error %","Time taken");
+            System.out.format("\n%-10s,%-10s,%-10s,%-15s,%-15s,%-15s,%-20s,%-20s,%-20s,%-30s,%-20s,%-20s\n",
+                    "p","q","Vertices", "Edges","Black edges", "Total memory","Red-black triangles","Red triangles","Exact count", "Estimate","Error %","Time taken");
             double estimates[] = new double[iterations];
             for(int i=0;i<iterations;i++) {
                 double startTime = System.currentTimeMillis();
-                MsspPQTimeStamp r = new MsspPQTimeStamp(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
+                PQSamplingWithTimeStampAllTriangles r = new PQSamplingWithTimeStampAllTriangles(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
                 r.sampleVertices();
                 r.sampleEdges();
                 r.countTriangles();
                 estimates[i] = r.getEstimateCount();
                 double endTime = System.currentTimeMillis();
 
-                String op = String.format("%-10s,%-10s,%-10s,%-15s,%-15s,%-15s,%-20s,%-30f,%-20s,%-20s",
-                        r.p,r.q,r.vertexReservoir.size(), r.edgeReservoir.size(),r.blackEdgeCount, r.edgeReservoir.size()+r.blackEdgeCount,
+                String op = String.format("%-10s,%-10s,%-10s,%-15s,%-15s,%-15s,%-20s,%-20s,%-20s,%-30f,%-20s,%-20s",
+                        r.p,r.q,r.vertexReservoir.size(), r.edgeReservoir.size(),r.blackEdgeCount, r.edgeReservoir.size()+r.blackEdgeCount,r.redBlackTriangleCount,r.redTriangleCount,
                         r.triangleFormed.size(), estimates[i], 100*(estimates[i] - actualCount)/(double)actualCount  ,(endTime-startTime)/1000);
                 System.out.println(op);
                 r.clearAll();
                 currOutputMap.put(estimates[i],op);
             }
             Arrays.sort(estimates);
-            System.out.println("\nMedian:" + estimates[iterations/2]);
+          //  System.out.println("\nMedian:" + estimates[iterations/2]);
             double sum=0;
             for(int i=0;i<iterations;i++) {
                 sum+=estimates[i];
             }
-            System.out.println("Average:" + sum/iterations);
+          //  System.out.println("Average:" + sum/iterations);
             outputTable.add(currOutputMap.get(estimates[iterations/2])+",   "+sum/iterations);
             printOutputs(outputTable);
         }
@@ -233,8 +255,8 @@ public class MsspPQTimeStamp {
     public static void printOutputs(ArrayList<String> outList){
         System.out.println("################ Consolidated result till now: ###############");
 
-        System.out.format("%-10s,%-10s,%-10s,%-15s,%-15s,%-15s,%-20s,%-30s,%-20s,%-20s,%-20s\n",
-                "p","q","Vertices", "Edges","Black edges", "Total memory","Exact count", "Estimate","Error %","Time taken","Average");
+        System.out.format("%-10s,%-10s,%-10s,%-15s,%-15s,%-15s,%-20s,%-20s,%-20s,%-30s,%-20s,%-20s,%-20s\n",
+                "p","q","Vertices", "Edges","Black edges", "Total memory","Red-black triangles","Red triangles","Exact count", "Estimate","Error %","Time taken","Average");
         Iterator<String> itr  = outList.iterator();
         while(itr.hasNext()){
             System.out.println(itr.next());
@@ -244,7 +266,7 @@ public class MsspPQTimeStamp {
 
     public double getEstimateCount(){
         int uTriangleCount = this.triangleFormed.size();
-        double estimate = uTriangleCount/(p*q);
+        double estimate = uTriangleCount/( (p*q) + Math.pow(q,3) - p*Math.pow(q,3)); //pq+q^3-pq^3
         return estimate;
     }
 
@@ -262,7 +284,7 @@ public class MsspPQTimeStamp {
                 middle = w;
 
             triangleFormed.add(smallest+","+middle+","+largest);
-            triangleCount++;
+            totalTriangleCount++;
         }
     }
 

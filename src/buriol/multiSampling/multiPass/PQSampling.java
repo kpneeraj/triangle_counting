@@ -1,28 +1,32 @@
-package buriol.multiSampling;
+package buriol.multiSampling.multiPass;
 
 import java.io.*;
 import java.util.*;
 
 /**
- * Created by Neeraj on 10/16/2016.
+ * Created by Neeraj on 8/5/2017.
  */
-public class MultiSamplingMultiPass {
+public class PQSampling {
     HashSet<Integer> vertexReservoir = new HashSet<Integer>();
     ArrayList<Edge> edgeReservoir = new ArrayList<Edge>();
     String inputFile;
-    int totalVertices, triangleCount=0, totalEdges=0, vreservoirCapcity, eReservoirCapacity,blueEdges=0;
+    int totalVertices, triangleCount=0, totalEdges=0, blueEdges=0;
+    double p,q;
     HashSet<String> triangleFormed;
 
+    /**
+     * serves as the black edge reservoir.It is named as res1 since we try to integrate vertex reservoir and black edge reservoir
+     * */
     HashMap<Integer,VertexInfo> res1map = new HashMap<Integer,VertexInfo>();
+
     HashMap<Integer,VertexInfo> res2map= new HashMap<Integer,VertexInfo>();
-    HashMap<Integer,VertexInfo> res3map= new HashMap<Integer,VertexInfo>();
 
     //ArrayList<String> fileBuffer = new ArrayList<String>();
 
 
-    public MultiSamplingMultiPass(int i, int i1, String s, int totalVertices) {
-        vreservoirCapcity = i;
-        eReservoirCapacity = i1;
+    public PQSampling(double p, double q, String s, int totalVertices) {
+        this.p=p;
+        this.q=q;
         inputFile=s;
         this.totalVertices = totalVertices;
     }
@@ -32,27 +36,18 @@ public class MultiSamplingMultiPass {
         vertexReservoir.clear();
         res1map.clear();
         res2map.clear();
-        res3map.clear();
         triangleFormed.clear();
         triangleCount=0; totalEdges=0;blueEdges=0;
     }
 
     /***
-     * This method runs a for loop from 0 to n and mocking the vertex stream
-     * and does a reservior sampling on the intergers from 1 to n.
+     * This method runs a for loop from 0 to n and samples with probability p.
      * */
     public void sampleVertices(){
         ArrayList<Integer> vertexReservoirList = new ArrayList<Integer>();
         for(int i=0;i<totalVertices;i++){
-            if(i<vreservoirCapcity){
-                vertexReservoirList.add(i);
-            }
-            else {
-                int random = (new Random().nextInt(i));
-                if(random<vreservoirCapcity){
-                    vertexReservoirList.remove(random);
-                    vertexReservoirList.add(random,i);
-                }
+            if(Math.random() <= p) {
+                    vertexReservoirList.add(i);
             }
         }
         this.vertexReservoir.addAll(vertexReservoirList);
@@ -81,122 +76,16 @@ public class MultiSamplingMultiPass {
     }
 
     private void sampleEdge(Edge edge) {
-        if(totalEdges<=eReservoirCapacity){
+        if(Math.random() <= q) {
             edgeReservoir.add(edge);
         }
-        else {
-            int random = (new Random().nextInt(totalEdges));
-            if(random<eReservoirCapacity){
-                edgeReservoir.remove(random);
-                edgeReservoir.add(random,edge);
-            }
-        }
-    }
 
-    public static void main(String args[]){
-        //constants for running the comparison
-        String filename="as-skitter_undirected.txt";
-        int totalVertices = 1696415; //1,806,067,135   4,173,724,142
-        double actualTriangleCount =28769868; //this is used only for the error % calculation
-        int iterations=5;
-
-        int[] ns = {17007,
-                84075,
-                169436,
-                254541,
-                339566,
-
-                17192,
-                84502,
-                170230,
-                254944,
-                339635,
-
-                17103,
-                85031,
-                169404,
-                254932,
-                338399,
-
-                17151,
-                85139,
-                170816,
-                254110,
-                338495,
-
-                16803,
-                84791,
-                169304,
-                253910,
-                338334};
-        int[] ms = { 110996,
-                110931,
-                110751,
-                111190,
-                111086,
-
-                555005,
-                553972,
-                553729,
-                554807,
-                554758,
-
-                1108626,
-                1111017,
-                1109780,
-                1109176,
-                1109459,
-
-                1663134,
-                1665772,
-                1664424,
-                1663646,
-                1663424,
-
-                2217721,
-                2220126,
-                2219619,
-                2219002,
-                2218330};
-
-        System.out.println("Multi pass multi sampling - " + filename + "\n");
-
-        for(int testcase=0;testcase<ns.length;testcase++){
-            System.out.println("\n\nTEst case result for n=" + ns[testcase] + " and m="+ms[testcase]);
-            MultiSamplingMultiPass r = new MultiSamplingMultiPass(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
-            System.out.println("Multiple sampling algorithm:");
-            //System.out.format("\n%-20s%-20s%-20s%-20s%-20s%-20s%-40s%-20s%-20s", "Iteration", "Vertex memory(n)", "Edge memory(m)","Black edges sampled", "Total size", "Exact count", "Estimate","Error %","Time taken");
-            System.out.format("\n%-20s,%-20s,%-20s,%-20s,%-20s,%-40s,%-20s,%-20s",  "Vertex memory(n)", "Edge memory(m)","Black edges sampled", "Total size", "Exact count", "Estimate","Error %","Time taken");
-
-            double estimates[] = new double[iterations];
-            for(int i=0;i<iterations;i++) {
-                double startTime = System.currentTimeMillis();
-                r.sampleVertices();
-                double time1 = System.currentTimeMillis();
-                r.sampleEdges();
-                double time2 = System.currentTimeMillis();
-                double timeParsingFile = time2-time1;
-                r.getCounts();
-                estimates[i] = r.getEstimateCount();
-                double endTime = System.currentTimeMillis();
-                System.out.format("\n%-20s,%-20s,%-20s,%-20s,%-20s,%-40s,%-20s,%-20s", r.vreservoirCapcity, r.eReservoirCapacity, r.blueEdges, (r.eReservoirCapacity + r.blueEdges) ,  r.triangleFormed.size(), estimates[i],100*( actualTriangleCount-estimates[i])/(double)actualTriangleCount,(endTime-startTime)/1000);
-                r.clearAll();
-            }
-
-            Arrays.sort(estimates);
-            System.out.println("\nMedian:" + estimates[iterations/2]);
-            double sum=0;
-            for(int i=0;i<iterations;i++) {
-                sum+=estimates[i];
-            }
-            System.out.println("\nAverage:" + sum/iterations);
-        }
     }
 
     public double getEstimateCount(){
         int uTriangleCount = this.triangleFormed.size();
-        double estimate = ((((double)totalEdges*(double)totalVertices))/((double)vreservoirCapcity*eReservoirCapacity))*(uTriangleCount/3);
-        return estimate;
+        //1 -(1-pq)^3
+        return  uTriangleCount / ( 1 - Math.pow((1-p*q),3));
     }
 
 
@@ -282,9 +171,7 @@ public class MultiSamplingMultiPass {
         catch(Exception e){
 
         }
-
     }
-
 
     public void addTriangle(HashSet<Integer> vertices, int u, int v){
         Iterator<Integer> itr = vertices.iterator();
@@ -325,4 +212,81 @@ public class MultiSamplingMultiPass {
         }
 
     }
+
+
+    public static void main(String args[]){
+        //constants for running the comparison
+        String filename="com-orkut_simplified.txt";
+        int totalVertices = 3072441;
+        int totalEdges = 117185083;
+        int actualTriangleCount= 627584181; //this is used only for error % calculation
+        int iterations=5;
+
+        double[] ns = { 0.01, 0.05, 0.1, 0.15, 0.2,
+                0.01, 0.05, 0.1, 0.15, 0.2,
+                0.01, 0.05, 0.1, 0.15, 0.2,
+                0.01, 0.05, 0.1, 0.15, 0.2,
+                0.01, 0.05, 0.1, 0.15, 0.2};
+        double[] ms = { 0.01, 0.01,0.01,0.01,0.01,
+                0.05, 0.05,0.05,0.05,0.05,
+                0.1,0.1,0.1,0.1,0.1,
+                0.15 ,0.15 ,0.15 ,0.15 ,0.15 ,
+                0.2,0.2,0.2,0.2,0.2};
+        System.out.println("Multi pass multi sampling PQ version- " + filename + "\n");
+        ArrayList<String> outputTable = new ArrayList<String>();
+        for(int testcase=0;testcase<ns.length;testcase++){
+            HashMap<Double,String> currOutputMap = new HashMap<Double,String> ();
+            System.out.println("\n\nTEst case result for n=" + ns[testcase] + " and m="+ms[testcase]);
+            PQSampling r = new PQSampling(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
+            System.out.println("Multiple sampling algorithm with fixed p and q:");
+            System.out.format("\n%-10s,%-10s,%-20s,%-20s,%-20s,%-15s,%-15s,%-15s,%-15s,%-20s",
+
+                    "p="+ns[testcase], "q="+ms[testcase], "Vertices sampled", "Red edges sampled" ,"Black edges sampled", "Total size",
+                    "Exact count", "Estimate", "Error %", "Time taken");
+
+            double estimates[] = new double[iterations];
+            for(int i=0;i<iterations;i++) {
+                double startTime = System.currentTimeMillis();
+                r.sampleVertices();
+                r.sampleEdges();
+                r.getCounts();
+                estimates[i] = r.getEstimateCount();
+                double endTime = System.currentTimeMillis();
+                String op = String.format("%-10s,%-10s,%-20s,%-20s,%-20s,%-15s,%-15s,%-15s,%-15s,%-20s",
+                        r.p, r.q, r.vertexReservoir.size(), r.edgeReservoir.size(), r.blueEdges,
+                        (r.edgeReservoir.size() + r.blueEdges) ,  r.triangleFormed.size(), estimates[i],
+                        100*( actualTriangleCount-estimates[i])/(double)actualTriangleCount,(endTime-startTime)/1000);
+                System.out.println(op);
+                r.clearAll();
+                currOutputMap.put(estimates[i],op);
+
+            }
+
+
+            Arrays.sort(estimates);
+            System.out.println("\nMedian:" + estimates[iterations/2]);
+            double sum=0;
+            for(int i=0;i<iterations;i++) {
+                sum+=estimates[i];
+            }
+            System.out.println("Average:" + sum/iterations);
+            outputTable.add(currOutputMap.get(estimates[iterations/2])+",   "+sum/iterations);
+            printOutputs(outputTable);
+        }
+    }
+
+
+    public static void printOutputs(ArrayList<String> outList){
+        System.out.println("################ Consolidated result till now: ###############");
+
+        System.out.format("%-10s,%-10s,%-10s,%-15s,%-15s,%-15s,%-20s,%-30s,%-20s,%-20s,%-20s\n",
+                "p","q","Vertices", "Edges","Black edges", "Total memory","Exact count", "Estimate","Error %","Time taken","Average");
+        Iterator<String> itr  = outList.iterator();
+        while(itr.hasNext()){
+            System.out.println(itr.next());
+        }
+        System.out.println("################################################################");
+    }
+
+
 }

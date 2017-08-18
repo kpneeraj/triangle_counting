@@ -1,4 +1,4 @@
-package buriol.multiSampling;
+package buriol.multiSampling.singlePass;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * Created by Neeraj on 8/9/2017.
  */
-public class MsspPQ {
+public class PQSampling {
 
     HashSet<Integer> vertexReservoir = new HashSet<Integer>();
     ArrayList<Edge> edgeReservoir = new ArrayList<Edge>();
@@ -18,7 +18,7 @@ public class MsspPQ {
     HashMap<Integer,VertexInfo> res2map= new HashMap<Integer,VertexInfo>();
     HashMap<Integer,VertexInfo> res3map= new HashMap<Integer,VertexInfo>();
 
-    public MsspPQ(double p, double q, String s, int totalVertices) {
+    public PQSampling(double p, double q, String s, int totalVertices) {
         this.p=p;
         this.q=q;
         this.totalVertices = totalVertices;
@@ -210,7 +210,7 @@ public class MsspPQ {
             double estimates[] = new double[iterations];
             for(int i=0;i<iterations;i++) {
                 double startTime = System.currentTimeMillis();
-                MsspPQ r = new MsspPQ(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
+                PQSampling r = new PQSampling(ns[testcase],ms[testcase],"graphs\\"+filename, totalVertices);
                 r.sampleVertices();
                 r.sampleEdges();
                 estimates[i] = r.getEstimateCount();

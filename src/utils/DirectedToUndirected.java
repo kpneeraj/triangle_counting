@@ -75,7 +75,7 @@ public class DirectedToUndirected {
 
     public static void main(String args[]){
         DirectedToUndirected dirtoUnDireced = new DirectedToUndirected();
-        dirtoUnDireced.convertGraph("graphs/com-livejournal.ungraph.txt");
+        dirtoUnDireced.convertGraph("graphs\\web-BerkStan.txt");
 
     }
 
