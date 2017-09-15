@@ -135,17 +135,14 @@ public class TriestBase {
 //    }
 
     public static void main(String args[]){
-        String filename="com-live-journal_simplified.txt";
-        int vertexCount = 3997962;
-        int actualTriangleCount= 177820130; //this is used only for error % calculation
-        int iterations = 1;
-        //int testCases = 7;
-        int[] memory ={ 25190,
-                39538,
-                54426,
-                96942,
-                217742,
-                1000000 };
+        String filename="com-orkut_simplified.txt";
+        int totalVertices = 3072441;
+        int actualTriangleCount=627584181; //this is used only for the error % calculation
+        int iterations=3;
+        int[] memory ={70653,
+                414787,
+                1989470,
+                3093190};
         ArrayList<String> outputTable = new ArrayList<String>();
         System.out.println("Triest Base algorithm- " + filename + "\n");
         for(int testcase=0;testcase<memory.length;testcase++){

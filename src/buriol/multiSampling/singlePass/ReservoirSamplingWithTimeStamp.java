@@ -220,38 +220,11 @@ public class ReservoirSamplingWithTimeStamp {
         String filename="com-orkut_simplified.txt";
         int totalVertices = 3072441;
         int actualCount=627584181; //this is used only for the error % calculation
-        int iterations=5;
+        int iterations=3;
 
-        int[] n = {30856,
-                153817,
-                306986,
-                460448,
-                614452,
+        int[] n = {15000};
 
-                30495,
-                153455,
-                306699,
-                460681,
-                613376,
-
-                30814,
-                153525,
-                307587};
-        int[] m = {1171375,
-                1172181,
-                1170354,
-                1171998,
-                1169683,
-
-                5860531,
-                5857492,
-                5857609,
-                5861145,
-                5861795,
-
-                11717812,
-                11722714,
-                11719013};
+        int[] m = {420000};
 
 
         System.out.println("Reservoir sampling single pass with timestamp: " + filename+"\n");

@@ -175,10 +175,10 @@ public class PQSamplingWithTimeStamp {
 
     public static void main(String args[]) {
         //constants for running the comparison
-        String filename="com-live-journal_simplified.txt";
-        int totalVertices = 3997962;
-        int actualCount=177820130; //this is used only for the error % calculation
-        int iterations=5;
+        String filename="com-orkut_simplified.txt";
+        int totalVertices = 3072441;
+        int actualCount=627584181; //this is used only for the error % calculation
+        int iterations=3;
 
         double[] ns = { 0.01, 0.05, 0.1, 0.15, 0.2,
                 0.01, 0.05, 0.1, 0.15, 0.2,

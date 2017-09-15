@@ -198,9 +198,9 @@ public class PQSamplingWithTimeStampAllTriangles {
 
     public static void main(String args[]) {
         //constants for running the comparison
-        String filename="com-amazon_simplified.txt";
-        int totalVertices = 334863;
-        int actualCount=667129; //this is used only for the error % calculation
+        String filename="com-live-journal_simplified.txt";
+        int totalVertices = 3997962;
+        int actualCount=177820130; //this is used only for the error % calculation
         int iterations=5;
 
         double[] ns = {
